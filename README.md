@@ -25,6 +25,8 @@ DRIVER=~aiohttp
 
 ### DODO_BOTS
 
+> 暂只支持 `WebSocket` 连接， `WebHook` 开发中，请先使用 WebSocket 连接模式
+
 从[DoDo开放平台](https://doker.imdodo.com/)创建机器人，获取 `client_id` 和 `token`，并在配置文件中配置机器人帐号列表。如：
 
 ```dotenv
