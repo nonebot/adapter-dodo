@@ -119,7 +119,7 @@ class MessageEvent(Event):
     message_type: MessageType = Field(alias="messageType")
     message_body: MessageBody = Field(alias="messageBody")
 
-    to_me: bool = Field(default=False, alias="toMe")
+    to_me: bool = False
 
     @property
     def message(self) -> Message:
@@ -127,9 +127,7 @@ class MessageEvent(Event):
 
     @property
     def origin_message(self) -> Message:
-        if not hasattr(self, "_origin_message"):
-            return self.get_message()
-        return getattr(self, "_origin_message")
+        return getattr(self, "_origin_message", self.get_message())
 
     @property
     def reply(self) -> Optional[Reference]:
@@ -367,7 +365,7 @@ class PersonalMessageEvent(MessageEvent):
         default=EventType.PERSONAL_MESSAGE, alias="eventType"
     )
 
-    to_me: bool = Field(default=True, alias="toMe")
+    to_me: bool = True
 
 
 EventClass = Union[

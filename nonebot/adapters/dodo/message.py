@@ -9,6 +9,7 @@ from typing import (
     Tuple,
     Type,
     TypedDict,
+    Union,
 )
 from typing_extensions import Self, override
 
@@ -146,6 +147,22 @@ class MessageSegment(BaseMessageSegment["Message"]):
     #             )
     #         },
     #     )
+
+    @override
+    def __add__(
+        self, other: Union[str, "MessageSegment", Iterable["MessageSegment"]]
+    ) -> "Message":
+        return Message(self) + (
+            MessageSegment.text(other) if isinstance(other, str) else other
+        )
+
+    @override
+    def __radd__(
+        self, other: Union[str, "MessageSegment", Iterable["MessageSegment"]]
+    ) -> "Message":
+        return (
+            MessageSegment.text(other) if isinstance(other, str) else Message(other)
+        ) + self
 
 
 class _TextData(TypedDict):
@@ -351,6 +368,22 @@ class Message(BaseMessage[MessageSegment]):
     @override
     def get_segment_class(cls) -> Type[MessageSegment]:
         return MessageSegment
+
+    @override
+    def __add__(
+        self, other: Union[str, MessageSegment, Iterable[MessageSegment]]
+    ) -> "Message":
+        return super().__add__(
+            MessageSegment.text(other) if isinstance(other, str) else other
+        )
+
+    @override
+    def __radd__(
+        self, other: Union[str, MessageSegment, Iterable[MessageSegment]]
+    ) -> "Message":
+        return super().__radd__(
+            MessageSegment.text(other) if isinstance(other, str) else other
+        )
 
     @staticmethod
     @override
