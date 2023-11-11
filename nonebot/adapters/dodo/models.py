@@ -1,20 +1,47 @@
 from datetime import datetime
 from enum import IntEnum
-from typing import Any, ClassVar, Generic, List, Literal, Optional, TypeVar, Union
+from typing import (
+    Any,
+    ClassVar,
+    Generic,
+    Iterator,
+    List,
+    Literal,
+    Optional,
+    TypeVar,
+    Union,
+)
 
 from pydantic import (
-    BaseModel,
+    BaseModel as PydanticBaseModel,
     Field,
 )
 from pydantic.generics import GenericModel
 
+from .utils import to_lower_camel
+
 T = TypeVar("T")
+
+
+class BaseModel(PydanticBaseModel):
+    class Config:
+        extra = "allow"
+        allow_population_by_field_name = True
+        alias_generator = to_lower_camel
 
 
 # API #
 class ListResult(GenericModel, Generic[T]):
-    max_id: int = Field(alias="maxId")
+    max_id: int
     list: List[T]
+
+    class Config:
+        extra = "allow"
+        allow_population_by_field_name = True
+        alias_generator = to_lower_camel
+
+    def __iter__(self) -> Iterator[T]:
+        return iter(self.list)
 
 
 class ApiReturn(BaseModel):
@@ -27,54 +54,41 @@ class ApiReturn(BaseModel):
 
 
 class BotInfo(BaseModel):
-    client_id: str = Field(alias="clientId")
-    dodo_source_id: str = Field(alias="dodoSourceId")
-    nick_name: str = Field(alias="nickName")
-    avatar_url: str = Field(alias="avatarUrl")
+    client_id: str
+    dodo_source_id: str
+    nick_name: str
+    avatar_url: str
 
 
-class BotInviteData(BaseModel):
-    dodo_source_id: str = Field(alias="dodoSourceId")
-    nick_name: str = Field(alias="nickName")
-    avatar_url: str = Field(alias="avatarUrl")
-
-
-GetBotInviteListReturn = ListResult[BotInviteData]
+class BotInviteInfo(BaseModel):
+    dodo_source_id: str
+    nick_name: str
+    avatar_url: str
 
 
 ## 群API ##
-class IslandData(BaseModel):
-    island_source_id: str = Field(alias="islandSourceId")
-    island_id: Optional[str] = Field(default=None, alias="islandId")
-    island_name: str = Field(alias="islandName")
-    cover_url: str = Field(alias="coverUrl")
-    member_count: int = Field(alias="memberCount")
-    online_member_count: int = Field(alias="onlineMemberCount")
-    description: Optional[str] = Field(default=None)
-    default_channel_id: str = Field(alias="defaultChannelId")
-    system_channel_id: str = Field(alias="systemChannelId")
-    owner_dodo_source_id: Optional[str] = Field(default=None, alias="ownerDodoSourceId")
+class IslandInfo(BaseModel):
+    island_source_id: str
+    island_id: Optional[str] = None
+    island_name: str
+    cover_url: str
+    member_count: int
+    online_member_count: int
+    description: Optional[str] = None
+    default_channel_id: str
+    system_channel_id: str
+    owner_dodo_source_id: Optional[str] = None
 
 
-GetIslandListReturn = List[IslandData]
-GetIslandInfoReturn = IslandData
-
-
-class IslandLevelRankData(BaseModel):
-    dodo_source_id: str = Field(alias="dodoSourceId")
-    nick_name: str = Field(alias="nickName")
+class IslandLevelRankInfo(BaseModel):
+    dodo_source_id: str
+    nick_name: str
     level: int
     rank: int
 
 
-GetIslandLevelRankListReturn = List[IslandLevelRankData]
-
-
 class IslandMuteOrBanData(BaseModel):
-    dodo_source_id: str = Field(alias="dodoSourceId")
-
-
-GetIslandMuteOrBanListReturn = ListResult[IslandMuteOrBanData]
+    dodo_source_id: str
 
 
 ## 频道API ##
@@ -86,43 +100,33 @@ class ChannelType(IntEnum):
     PROFILE = 6
 
 
+class ChannelInfo(BaseModel):
+    channel_id: str
+    channel_name: str
+    channel_type: ChannelType
+    island_source_id: Optional[str] = None
+    default_flag: bool
+    group_id: str
+    group_name: str
+
+
 class ChannelData(BaseModel):
-    channel_id: str = Field(alias="channelId")
-    channel_name: str = Field(alias="channelName")
-    channel_type: ChannelType = Field(alias="channelType")
-    island_source_id: Optional[str] = Field(default=None, alias="islandSourceId")
-    default_flag: bool = Field(alias="defaultFlag")
-    group_id: str = Field(alias="groupId")
-    group_name: str = Field(alias="groupName")
-
-
-GetChannelListReturn = List[ChannelData]
-GetChannelInfoReturn = ChannelData
-
-
-class SetChannelAddReturn(BaseModel):
-    channel_id: str = Field(alias="channelId")
+    channel_id: str
 
 
 ## 频道消息API ##
-class SetChannelMessageSendReturn(BaseModel):
-    message_id: str = Field(alias="messageId")
+class MessageReturn(BaseModel):
+    message_id: str
 
 
-class MessageReactionData(BaseModel):
+class MessageReactionInfo(BaseModel):
     emoji: "Emoji"
     count: int
 
 
-GetChannelMessageReactionListReturn = List[MessageReactionData]
-
-
-class MessageReactionMemberData(BaseModel):
-    dodo_source_id: str = Field(alias="dodoSourceId")
-    nick_name: str = Field(alias="nickName")
-
-
-GetChannelMessageReactionMemberListReturn = ListResult[MessageReactionMemberData]
+class MessageReactionMemberInfo(BaseModel):
+    dodo_source_id: str
+    nick_name: str
 
 
 ## 语音频道API ##
@@ -139,16 +143,16 @@ class ManageOperateType(IntEnum):
     REMOVE = 3
 
 
-class GetChannelVoiceMemberStatusReturn(BaseModel):
-    channel_id: str = Field(alias="channelId")
-    spk_status: bool = Field(alias="spkStatus")
-    mic_status: bool = Field(alias="micStatus")
-    mic_sort_status: MicSortStatus = Field(alias="micSortStatus")
+class ChannelVoiceMemberStatusInfo(BaseModel):
+    channel_id: str
+    spk_status: bool
+    mic_status: bool
+    mic_sort_status: MicSortStatus
 
 
 ## 帖子频道API ##
-class SetChannelArticleAddReturn(BaseModel):
-    article_id: str = Field(alias="articleId")
+class ChannelArticleData(BaseModel):
+    article_id: str
 
 
 class BussinessType(IntEnum):
@@ -158,28 +162,22 @@ class BussinessType(IntEnum):
 
 
 ## 身份组API ##
-class RoleData(BaseModel):
-    role_id: str = Field(alias="roleId")
-    role_name: str = Field(alias="roleName")
-    role_color: str = Field(alias="roleColor")
+class RoleInfo(BaseModel):
+    role_id: str
+    role_name: str
+    role_color: str
     position: int
     permission: str
-    member_count: int = Field(alias="memberCount")
+    member_count: int
 
 
-GetRoleListReturn = List[RoleData]
+class RoleData(BaseModel):
+    role_id: str
 
 
-class SetRoleAddReturn(BaseModel):
-    role_id: str = Field(alias="roleId")
-
-
-class RoleMemberData(BaseModel):
-    dodo_source_id: str = Field(alias="dodoSourceId")
-    nick_name: str = Field(alias="nickName")
-
-
-GetRoleMemberListReturn = ListResult[RoleMemberData]
+class RoleMemberInfo(BaseModel):
+    dodo_source_id: str
+    nick_name: str
 
 
 ## 成员API ##
@@ -196,121 +194,91 @@ class OnlineStatus(IntEnum):
     LEAVE = 3
 
 
-class MemberData(BaseModel):
-    island_source_id: Optional[str] = Field(default=None, alias="islandSourceId")
-    dodo_source_id: str = Field(alias="dodoSourceId")
-    nick_name: str = Field(alias="nickName")
-    personal_nick_name: str = Field(alias="personalNickName")
-    avatar_url: str = Field(alias="avatarUrl")
-    join_time: datetime = Field(alias="joinTime")
+class MemberInfo(BaseModel):
+    island_source_id: Optional[str] = None
+    dodo_source_id: str
+    nick_name: str
+    personal_nick_name: str
+    avatar_url: str
+    join_time: datetime
     sex: "Sex"
     level: int
-    is_bot: bool = Field(alias="isBot")
-    online_device: OnlineDevice = Field(alias="onlineDevice")
-    online_status: OnlineStatus = Field(alias="onlineStatus")
-    inviter_dodo_source_id: Optional[str] = Field(
-        default=None, alias="inviterDodoSourceId"
-    )
+    is_bot: bool
+    online_device: OnlineDevice
+    online_status: OnlineStatus
+    inviter_dodo_source_id: Optional[str] = None
 
 
-GetMemberListReturn = ListResult[MemberData]
-GetMemberInfoReturn = MemberData
-
-
-class MemberRoleData(BaseModel):
-    role_id: str = Field(alias="roleId")
-    role_name: str = Field(alias="roleName")
-    role_color: str = Field(alias="roleColor")
+class MemberRoleInfo(BaseModel):
+    role_id: str
+    role_name: str
+    role_color: str
     position: int
     permission: str
 
 
-GetMemberRoleListReturn = List[MemberRoleData]
-
-
 class GetMemberInvitationInfoReturn(BaseModel):
-    dodo_source_id: str = Field(alias="dodoSourceId")
-    nick_name: str = Field(alias="nickName")
-    invitation_count: int = Field(alias="invitationCount")
+    dodo_source_id: str
+    nick_name: str
+    invitation_count: int
 
 
-class DoDoIDMappingData(BaseModel):
-    dodo_id: str = Field(alias="dodoId")
-    dodo_source_id: str = Field(alias="dodoSourceId")
-
-
-GetMemberDodoIdMapListReturn = List[DoDoIDMappingData]
+class DoDoIDMapData(BaseModel):
+    dodo_id: str
+    dodo_source_id: str
 
 
 ## 赠礼系统API ##
-class GetGiftAccountReturn(BaseModel):
-    total_income: float = Field(alias="totalIncome")
-    settlable_income: float = Field(alias="settlableIncome")
-    transferable_income: float = Field(alias="transferableIncome")
+class GiftAccountInfo(BaseModel):
+    total_income: float
+    settlable_income: float
+    transferable_income: float
 
 
 class DefaultRatio(BaseModel):
-    island_ratio: float = Field(alias="islandRatio")
-    user_ratio: float = Field(alias="userRatio")
-    platform_ratio: float = Field(alias="platformRatio")
+    island_ratio: float
+    user_ratio: float
+    platform_ratio: float
 
 
 class RoleRatio(BaseModel):
-    role_id: str = Field(alias="roleId")
-    role_name: str = Field(alias="roleName")
-    island_ratio: float = Field(alias="islandRatio")
-    user_ratio: float = Field(alias="userRatio")
-    platform_ratio: float = Field(alias="platformRatio")
+    role_id: str
+    role_name: str
+    island_ratio: float
+    user_ratio: float
+    platform_ratio: float
 
 
-class GetGiftShareRatioInfoReturn(BaseModel):
-    default_ratio: DefaultRatio = Field(alias="defaultRatio")
-    role_ratio_list: List[RoleRatio] = Field(alias="roleRatioList")
+class GiftShareRatioInfo(BaseModel):
+    default_ratio: DefaultRatio
+    role_ratio_list: List[RoleRatio]
 
 
-class GiftData(BaseModel):
-    gift_id: str = Field(alias="giftId")
-    gift_count: int = Field(alias="giftCount")
-    gift_total_amount: float = Field(alias="giftTotalAmount")
+class GiftInfo(BaseModel):
+    gift_id: str
+    gift_count: int
+    gift_total_amount: float
 
 
-GetGiftListReturn = List[GiftData]
+class GiftMemberInfo(BaseModel):
+    dodo_source_id: str
+    nick_name: str
+    gift_count: int
 
 
-class GiftMemberData(BaseModel):
-    dodo_source_id: str = Field(alias="dodoSourceId")
-    nick_name: str = Field(alias="nickName")
-    gift_count: int = Field(alias="giftCount")
-
-
-GetGiftMemberListReturn = ListResult[GiftMemberData]
-
-
-class GiftGrossValueData(BaseModel):
-    dodo_source_id: str = Field(alias="dodoSourceId")
-    nick_name: str = Field(alias="nickName")
-    gift_total_amount: float = Field(alias="giftTotalAmount")
-
-
-GetGiftGrossValueListReturn = ListResult[GiftGrossValueData]
+class GiftGrossValueInfo(BaseModel):
+    dodo_source_id: str
+    nick_name: str
+    gift_total_amount: float
 
 
 ## 积分系统API ##
-class GetIntegralInfoReturn(BaseModel):
-    integral_balance: int = Field(alias="integralBalance")
-
-
-class SetIntegralEditReturn(BaseModel):
-    integral_balance: int = Field(alias="integralBalance")
-
-
-## 私信API ##
-class SetPersonalMessageSendReturn(BaseModel):
-    message_id: str = Field(alias="messageId")
+class IntegralInfo(BaseModel):
+    integral_balance: int
 
 
 ## 资源API ##
-class SetResourcePictureUploadReturn(BaseModel):
+class PictureInfo(BaseModel):
     url: str
     width: int
     height: int
@@ -319,7 +287,7 @@ class SetResourcePictureUploadReturn(BaseModel):
 ## 事件API ##
 
 
-class GetWebSocketConnectionReturn(BaseModel):
+class WebSocketConnectionData(BaseModel):
     endpoint: str
 
 
@@ -363,20 +331,20 @@ class PictureMessage(BaseModel):
     url: str
     width: int
     height: int
-    is_original: Optional[OriginType] = Field(default=None, alias="isOriginal")
+    is_original: Optional[OriginType] = None
 
 
 class VideoMessage(BaseModel):
     __type__: ClassVar[Literal[MessageType.VIDEO]] = MessageType.VIDEO
     url: str
-    cover_url: Optional[str] = Field(default=None, alias="coverUrl")
-    duration: Optional[int] = Field(default=None)
-    size: Optional[int] = Field(default=None)
+    cover_url: Optional[str] = None
+    duration: Optional[int] = None
+    size: Optional[int] = None
 
 
 class ShareMessage(BaseModel):
     __type__: ClassVar[Literal[MessageType.SHARE]] = MessageType.SHARE
-    jump_url: str = Field(alias="jumpUrl")
+    jump_url: str
 
 
 class FileMessage(BaseModel):
@@ -388,7 +356,7 @@ class FileMessage(BaseModel):
 
 class CardMessage(BaseModel):
     __type__: ClassVar[Literal[MessageType.CARD]] = MessageType.CARD
-    content: Optional[str] = Field(default=None)
+    content: Optional[str] = None
     card: "Card"
 
 
@@ -396,9 +364,9 @@ class RedPacketMessage(BaseModel):
     __type__: ClassVar[Literal[MessageType.RED_PACKET]] = MessageType.RED_PACKET
     type: RedPacketType
     count: int
-    total_amount: float = Field(alias="totalAmount")
-    receiver_type: ReceiverType = Field(alias="receiverType")
-    role_id_list: Optional[List[str]] = Field(default=None, alias="roleIdList")
+    total_amount: float
+    receiver_type: ReceiverType
+    role_id_list: Optional[List[str]] = None
 
 
 MessageBody = Union[
@@ -421,20 +389,20 @@ class Sex(IntEnum):
 
 
 class Personal(BaseModel):
-    nick_name: str = Field(alias="nickName")
-    avatar_url: str = Field(alias="avatarUrl")
+    nick_name: str
+    avatar_url: str
     sex: Sex
 
 
 class Member(BaseModel):
-    nick_name: str = Field(alias="nickName")
-    join_time: datetime = Field(alias="joinTime")
+    nick_name: str
+    join_time: datetime
 
 
 class Reference(BaseModel):
-    message_id: str = Field(alias="messageId")
-    dodo_source_id: str = Field(alias="dodoSourceId")
-    nick_name: str = Field(alias="nickName")
+    message_id: str
+    dodo_source_id: str
+    nick_name: str
 
 
 class ReactionTarget(BaseModel):
@@ -519,7 +487,7 @@ class Card(BaseModel):
     type: Literal["card"] = Field(default="card", init=False)
     components: List["Component"]
     theme: CardTheme = Field(default="default")
-    title: Optional[str] = Field(default=None)
+    title: Optional[str] = None
 
 
 ## 内容组件 ##
@@ -559,8 +527,8 @@ class CardMultiText(BaseModel):
 ### 备注 ###
 class RemarkData(BaseModel):
     type: Literal["image", "plain-text", "dodo-md"]
-    content: Optional[str] = Field(default=None)
-    src: Optional[str] = Field(default=None)
+    content: Optional[str] = None
+    src: Optional[str] = None
 
 
 class CardRemark(BaseModel):
@@ -583,7 +551,7 @@ class CardImageGroup(BaseModel):
 ### 视频 ###
 class CardVideo(BaseModel):
     type: Literal["video"] = Field(default="video", init=False)
-    title: Optional[str] = Field(default=None)
+    title: Optional[str] = None
     cover: str
     src: str
 
@@ -591,9 +559,9 @@ class CardVideo(BaseModel):
 ### 倒计时 ###
 class CardCountdown(BaseModel):
     type: Literal["countdown"] = Field(default="countdown", init=False)
-    title: Optional[str] = Field(default=None)
+    title: Optional[str] = None
     style: Literal["day", "hour"]
-    end_time: int = Field(alias="endTime")
+    end_time: int
 
 
 class CardDivider(BaseModel):
@@ -603,19 +571,19 @@ class CardDivider(BaseModel):
 ## 交互组件 ##
 ### 按钮 ###
 class ButtonClickAction(BaseModel):
-    value: Optional[str] = Field(default=None)
+    value: Optional[str] = None
     action: Literal["link_url", "call_back", "copy_content", "form"]
 
 
 class CardButton(BaseModel):
     type: Literal["button"] = Field(default="button", init=False)
-    interact_custom_id: Optional[str] = Field(default=None, alias="interactCustomId")
+    interact_custom_id: Optional[str] = None
     click: ButtonClickAction
     color: Literal[
         "grey", "red", "orange", "green", "blue", "purple", "default"
     ] = "default"
     name: str
-    form: Optional["CallbackForm"] = Field(default=None)
+    form: Optional["CallbackForm"] = None
 
 
 class CardButtonGroup(BaseModel):
@@ -626,13 +594,13 @@ class CardButtonGroup(BaseModel):
 ### 列表选择器 ###
 class ListSelectorElement(BaseModel):
     name: str
-    desc: Optional[str] = Field(default=None)
+    desc: Optional[str] = None
 
 
 class CardListSelector(BaseModel):
     type: Literal["list-selector"] = Field(default="list-selector", init=False)
-    interact_custom_id: Optional[str] = Field(default=None, alias="interactCustomId")
-    placeholder: Optional[str] = Field(default=None)
+    interact_custom_id: Optional[str] = None
+    placeholder: Optional[str] = None
     elements: List[ListSelectorElement]
     min: int
     max: int
@@ -644,9 +612,9 @@ class CallbackFormData(BaseModel):
     key: str
     title: str
     rows: int = Field(le=4)
-    placeholder: Optional[str] = Field(default=None)
-    min_char: int = Field(ge=0, le=4000, alias="minChar")
-    max_char: int = Field(ge=1, le=4000, alias="maxChar")
+    placeholder: Optional[str] = None
+    min_char: int = Field(ge=0, le=4000)
+    max_char: int = Field(ge=1, le=4000)
 
 
 class CallbackForm(BaseModel):
@@ -657,7 +625,7 @@ class CallbackForm(BaseModel):
 ### 文字 + 模块 ###
 class CardTextModule(BaseModel):
     type: Literal["section"] = Field(default="section", init=False)
-    align: Optional[Literal["left", "right"]] = Field(default=None)
+    align: Optional[Literal["left", "right"]] = None
     text: Union[CardText, CardMultiText]
     accessory: Union[CardImage, CardButton]
 
@@ -677,8 +645,8 @@ Component = Union[
     CardTextModule,
 ]
 
-MemberData.update_forward_refs()
-MessageReactionData.update_forward_refs()
+MemberInfo.update_forward_refs()
+MessageReactionInfo.update_forward_refs()
 CardButton.update_forward_refs()
 Card.update_forward_refs()
 CardMessage.update_forward_refs()

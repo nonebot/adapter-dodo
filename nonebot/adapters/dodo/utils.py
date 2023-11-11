@@ -26,6 +26,12 @@ P = ParamSpec("P")
 log = logger_wrapper("DoDo")
 
 
+def to_lower_camel(string: str) -> str:
+    return (
+        string[0].lower() + "".join(word.capitalize() for word in string.split("_"))[1:]
+    )
+
+
 def exclude_none(data: Dict[str, Any]) -> Dict[str, Any]:
     return {k: v for k, v in data.items() if v is not None}
 

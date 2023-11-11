@@ -93,7 +93,7 @@ class MessageSegment(BaseMessageSegment["Message"]):
             "video",
             {
                 "video": VideoMessage(
-                    url=url, coverUrl=cover_url, duration=duration, size=size
+                    url=url, cover_url=cover_url, duration=duration, size=size
                 )
             },
         )
@@ -492,5 +492,14 @@ class Message(BaseMessage[MessageSegment]):
         return "".join(
             str(seg)
             for seg in self
-            if isinstance(seg, (TextSegment, AtUserSegment, ChannelLinkSegment))
+            if isinstance(
+                seg,
+                (
+                    TextSegment,
+                    AtUserSegment,
+                    AtRoleSegment,
+                    AtAllSegment,
+                    ChannelLinkSegment,
+                ),
+            )
         )

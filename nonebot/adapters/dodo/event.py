@@ -26,6 +26,7 @@ from .models import (
     Reference,
     TargetType,
 )
+from .utils import to_lower_camel
 
 
 class EventType(str, Enum):
@@ -64,14 +65,16 @@ class EventType(str, Enum):
 
 
 class Event(BaseEvent):
-    event_id: str = Field(alias="eventId")
-    event_type: EventType = Field(alias="eventType")
+    event_id: str
+    event_type: EventType
     timestamp: datetime
 
-    dodo_source_id: str = Field(alias="dodoSourceId")
+    dodo_source_id: str
 
     class Config:
         extra = "allow"
+        allow_population_by_field_name = True
+        alias_generator = to_lower_camel
 
     @property
     def user_id(self) -> str:
@@ -113,11 +116,11 @@ class NoticeEvent(Event):
 
 
 class MessageEvent(Event):
-    island_source_id: Optional[str] = Field(default=None, alias="islandSourceId")
+    island_source_id: Optional[str] = None
     personal: Personal
-    message_id: str = Field(alias="messageId")
-    message_type: MessageType = Field(alias="messageType")
-    message_body: MessageBody = Field(alias="messageBody")
+    message_id: str
+    message_type: MessageType
+    message_body: MessageBody
 
     to_me: bool = False
 
@@ -162,208 +165,176 @@ class MessageEvent(Event):
 
 
 class ChannelMessageEvent(MessageEvent):
-    event_type: Literal[EventType.MESSAGE] = Field(
-        default=EventType.MESSAGE, alias="eventType"
-    )
+    event_type: Literal[EventType.MESSAGE]
 
     member: Member
-    island_source_id: str = Field(alias="islandSourceId")
-    channel_id: str = Field(alias="channelId")
-    reference: Optional[Reference] = Field(default=None)
+    island_source_id: str
+    channel_id: str
+    reference: Optional[Reference] = None
 
 
 class MessageReactionEvent(NoticeEvent):
-    event_type: Literal[EventType.MESSAGE_REACTION] = Field(
-        default=EventType.MESSAGE_REACTION, alias="eventType"
-    )
+    event_type: Literal[EventType.MESSAGE_REACTION]
 
-    island_source_id: str = Field(alias="islandSourceId")
-    channel_id: str = Field(alias="channelId")
-    message_id: str = Field(alias="messageId")
+    island_source_id: str
+    channel_id: str
+    message_id: str
     personal: Personal
     member: Member
 
-    reaction_target: ReactionTarget = Field(alias="reactionTarget")
-    reaction_emoji: Emoji = Field(alias="reactionEmoji")
-    reaction_type: ReactionType = Field(alias="reactionType")
+    reaction_target: ReactionTarget
+    reaction_emoji: Emoji
+    reaction_type: ReactionType
 
 
 class CardMessageButtonClickEvent(NoticeEvent):
-    event_type: Literal[EventType.CARD_MESSAGE_BUTTON_CLICK] = Field(
-        default=EventType.CARD_MESSAGE_BUTTON_CLICK, alias="eventType"
-    )
+    event_type: Literal[EventType.CARD_MESSAGE_BUTTON_CLICK]
 
-    island_source_id: str = Field(alias="islandSourceId")
-    channel_id: str = Field(alias="channelId")
-    message_id: str = Field(alias="messageId")
+    island_source_id: str
+    channel_id: str
+    message_id: str
     personal: Personal
     member: Member
-    interact_custom_id: str = Field(alias="interactCustomId")
+    interact_custom_id: str
     value: str
 
 
 class CardMessageFormSubmitEvent(NoticeEvent):
-    event_type: Literal[EventType.CARD_MESSAGE_FORM_SUBMIT] = Field(
-        default=EventType.CARD_MESSAGE_FORM_SUBMIT, alias="eventType"
-    )
+    event_type: Literal[EventType.CARD_MESSAGE_FORM_SUBMIT]
 
-    island_source_id: str = Field(alias="islandSourceId")
-    channel_id: str = Field(alias="channelId")
-    message_id: str = Field(alias="messageId")
+    island_source_id: str
+    channel_id: str
+    message_id: str
     personal: Personal
     member: Member
-    interact_custom_id: str = Field(alias="interactCustomId")
-    form_data: List[FormData] = Field(alias="formData")
+    interact_custom_id: str
+    form_data: List[FormData]
 
 
 class CardMessageListSubmitEvent(NoticeEvent):
-    event_type: Literal[EventType.CARD_MESSAGE_LIST_SUBMIT] = Field(
-        default=EventType.CARD_MESSAGE_LIST_SUBMIT, alias="eventType"
-    )
+    event_type: Literal[EventType.CARD_MESSAGE_LIST_SUBMIT]
 
-    island_source_id: str = Field(alias="islandSourceId")
-    channel_id: str = Field(alias="channelId")
-    message_id: str = Field(alias="messageId")
+    island_source_id: str
+    channel_id: str
+    message_id: str
     personal: Personal
     member: Member
-    interact_custom_id: str = Field(alias="interactCustomId")
-    list_data: List[ListData] = Field(alias="listData")
+    interact_custom_id: str
+    list_data: List[ListData]
 
 
 class ChannelVoiceMemberJoinEvent(NoticeEvent):
-    event_type: Literal[EventType.CHANNEL_VOICE_MEMBER_JOIN] = Field(
-        default=EventType.CHANNEL_VOICE_MEMBER_JOIN, alias="eventType"
-    )
+    event_type: Literal[EventType.CHANNEL_VOICE_MEMBER_JOIN]
 
-    island_source_id: str = Field(alias="islandSourceId")
-    channel_id: str = Field(alias="channelId")
+    island_source_id: str
+    channel_id: str
     personal: Personal
     member: Member
 
 
 class ChannelVoiceMemberLeaveEvent(NoticeEvent):
-    event_type: Literal[EventType.CHANNEL_VOICE_MEMBER_LEAVE] = Field(
-        default=EventType.CHANNEL_VOICE_MEMBER_LEAVE, alias="eventType"
-    )
+    event_type: Literal[EventType.CHANNEL_VOICE_MEMBER_LEAVE]
 
-    island_source_id: str = Field(alias="islandSourceId")
-    channel_id: str = Field(alias="channelId")
+    island_source_id: str
+    channel_id: str
     personal: Personal
     member: Member
 
 
 class ChannelArticleEvent(NoticeEvent):
-    event_type: Literal[EventType.CHANNEL_ARTICLE] = Field(
-        default=EventType.CHANNEL_ARTICLE, alias="eventType"
-    )
+    event_type: Literal[EventType.CHANNEL_ARTICLE]
 
-    island_source_id: str = Field(alias="islandSourceId")
-    channel_id: str = Field(alias="channelId")
+    island_source_id: str
+    channel_id: str
     personal: Personal
     member: Member
-    artical_id: str = Field(alias="articalId")
+    artical_id: str
     title: str
-    image_list: List[str] = Field(alias="imageList")
+    image_list: List[str]
     content: str
 
 
 class ChannelArticleCommentEvent(NoticeEvent):
-    event_type: Literal[EventType.CHANNEL_ARTICLE_COMMENT] = Field(
-        default=EventType.CHANNEL_ARTICLE_COMMENT, alias="eventType"
-    )
+    event_type: Literal[EventType.CHANNEL_ARTICLE_COMMENT]
 
-    island_source_id: str = Field(alias="islandSourceId")
-    channel_id: str = Field(alias="channelId")
+    island_source_id: str
+    channel_id: str
     personal: Personal
     member: Member
-    artical_id: str = Field(alias="articalId")
-    comment_id: str = Field(alias="commentId")
-    reply_id: str = Field(alias="replyId")
-    image_list: List[str] = Field(alias="imageList")
+    artical_id: str
+    comment_id: str
+    reply_id: str
+    image_list: List[str]
     content: str
 
 
 class MemberJoinEvent(NoticeEvent):
-    event_type: Literal[EventType.MEMBER_JOIN] = Field(
-        default=EventType.MEMBER_JOIN, alias="eventType"
-    )
+    event_type: Literal[EventType.MEMBER_JOIN]
 
-    island_source_id: str = Field(alias="islandSourceId")
+    island_source_id: str
     personal: Personal
-    modify_time: datetime = Field(alias="modifyTime")
+    modify_time: datetime
 
 
 class MemberLeaveEvent(NoticeEvent):
-    event_type: Literal[EventType.MEMBER_LEAVE] = Field(
-        default=EventType.MEMBER_LEAVE, alias="eventType"
-    )
+    event_type: Literal[EventType.MEMBER_LEAVE]
 
-    island_source_id: str = Field(alias="islandSourceId")
+    island_source_id: str
     personal: Personal
-    leave_type: LeaveType = Field(alias="leaveType")
-    operate_dodo_source_id: str = Field(alias="operateDodoSourceId")
-    modify_time: datetime = Field(alias="modifyTime")
+    leave_type: LeaveType
+    operate_dodo_source_id: str
+    modify_time: datetime
 
 
 class MemberInviteEvent(NoticeEvent):
-    event_type: Literal[EventType.MEMBER_INVITE] = Field(
-        default=EventType.MEMBER_INVITE, alias="eventType"
-    )
+    event_type: Literal[EventType.MEMBER_INVITE]
 
-    island_source_id: str = Field(alias="islandSourceId")
-    dodo_island_nick_name: str = Field(alias="dodoIslandNickName")
-    to_dodo_source_id: str = Field(alias="toDodoSourceId")
-    to_dodo_island_nick_name: str = Field(alias="toDodoIslandNickName")
+    island_source_id: str
+    dodo_island_nick_name: str
+    to_dodo_source_id: str
+    to_dodo_island_nick_name: str
 
 
 class GiftSendEvent(NoticeEvent):
-    event_type: Literal[EventType.GIFT_SEND] = Field(
-        default=EventType.GIFT_SEND, alias="eventType"
-    )
+    event_type: Literal[EventType.GIFT_SEND]
 
-    island_source_id: str = Field(alias="islandSourceId")
-    channel_id: str = Field(alias="channelId")
-    order_no: str = Field(alias="orderNo")
-    target_type: TargetType = Field(alias="targetType")
-    target_id: str = Field(alias="targetId")
-    total_amount: float = Field(alias="totalAmount")
+    island_source_id: str
+    channel_id: str
+    order_no: str
+    target_type: TargetType
+    target_id: str
+    total_amount: float
     gift: Gift
-    island_ratio: float = Field(alias="islandRatio")
-    island_income: float = Field(alias="islandIncome")
-    dodo_island_nick_name: str = Field(alias="dodoIslandNickName")
-    to_dodo_source_id: str = Field(alias="toDodoSourceId")
-    to_dodo_island_nick_name: str = Field(alias="toDodoIslandNickName")
-    to_dodo_ratio: float = Field(alias="toDodoRatio")
-    to_dodo_income: float = Field(alias="toDodoIncome")
+    island_ratio: float
+    island_income: float
+    dodo_island_nick_name: str
+    to_dodo_source_id: str
+    to_dodo_island_nick_name: str
+    to_dodo_ratio: float
+    to_dodo_income: float
 
 
 class IntegralChangeEvent(NoticeEvent):
-    event_type: Literal[EventType.INTEGRAL_CHANGE] = Field(
-        default=EventType.INTEGRAL_CHANGE, alias="eventType"
-    )
+    event_type: Literal[EventType.INTEGRAL_CHANGE]
 
-    island_source_id: str = Field(alias="islandSourceId")
-    operate_type: OperateType = Field(alias="operateType")
+    island_source_id: str
+    operate_type: OperateType
     integral: int
 
 
 class GoodsPurchaseEvent(NoticeEvent):
-    event_type: Literal[EventType.GOODS_PURCHASE] = Field(
-        default=EventType.GOODS_PURCHASE, alias="eventType"
-    )
+    event_type: Literal[EventType.GOODS_PURCHASE]
 
-    island_source_id: str = Field(alias="islandSourceId")
-    order_no: str = Field(alias="orderNo")
-    goods_type: GoodsType = Field(alias="goodsType")
-    goods_id: str = Field(alias="goodsId")
-    goods_name: str = Field(alias="goodsName")
-    goods_image_list: List[str] = Field(alias="goodsImageList")
+    island_source_id: str
+    order_no: str
+    goods_type: GoodsType
+    goods_id: str
+    goods_name: str
+    goods_image_list: List[str]
 
 
 class PersonalMessageEvent(MessageEvent):
-    event_type: Literal[EventType.PERSONAL_MESSAGE] = Field(
-        default=EventType.PERSONAL_MESSAGE, alias="eventType"
-    )
+    event_type: Literal[EventType.PERSONAL_MESSAGE]
 
     to_me: bool = True
 
@@ -394,7 +365,7 @@ class EventSubject(BaseModel):
     version: str
 
     @validator("data", pre=True)
-    def pre_handle_data(cls, v: Dict[str, Any]):
+    def pre_handle_data(cls, v: Dict[str, Any]) -> Dict[str, Any]:
         v.update(v.pop("eventBody"))
         return v
 

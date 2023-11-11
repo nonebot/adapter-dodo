@@ -21,44 +21,40 @@ from .message import Message, MessageSegment
 from .models import (
     ApiReturn,
     BotInfo,
+    BotInviteInfo,
     BussinessType,
+    ChannelArticleData,
+    ChannelData,
+    ChannelInfo,
     ChannelType,
+    ChannelVoiceMemberStatusInfo,
+    DoDoIDMapData,
     Emoji,
-    GetBotInviteListReturn,
-    GetChannelInfoReturn,
-    GetChannelListReturn,
-    GetChannelMessageReactionListReturn,
-    GetChannelMessageReactionMemberListReturn,
-    GetChannelVoiceMemberStatusReturn,
-    GetGiftAccountReturn,
-    GetGiftGrossValueListReturn,
-    GetGiftListReturn,
-    GetGiftMemberListReturn,
-    GetGiftShareRatioInfoReturn,
-    GetIntegralInfoReturn,
-    GetIslandInfoReturn,
-    GetIslandLevelRankListReturn,
-    GetIslandListReturn,
-    GetIslandMuteOrBanListReturn,
-    GetMemberDodoIdMapListReturn,
-    GetMemberInfoReturn,
     GetMemberInvitationInfoReturn,
-    GetMemberListReturn,
-    GetMemberRoleListReturn,
-    GetRoleListReturn,
-    GetRoleMemberListReturn,
-    GetWebSocketConnectionReturn,
+    GiftAccountInfo,
+    GiftGrossValueInfo,
+    GiftInfo,
+    GiftMemberInfo,
+    GiftShareRatioInfo,
+    IntegralInfo,
+    IslandInfo,
+    IslandLevelRankInfo,
+    IslandMuteOrBanData,
+    ListResult,
     ManageOperateType,
+    MemberInfo,
+    MemberRoleInfo,
     MessageBody,
+    MessageReactionInfo,
+    MessageReactionMemberInfo,
+    MessageReturn,
     MessageType,
-    SetChannelAddReturn,
-    SetChannelArticleAddReturn,
-    SetChannelMessageSendReturn,
-    SetIntegralEditReturn,
-    SetPersonalMessageSendReturn,
-    SetResourcePictureUploadReturn,
-    SetRoleAddReturn,
+    PictureInfo,
+    RoleData,
+    RoleInfo,
+    RoleMemberInfo,
     TargetType,
+    WebSocketConnectionData,
 )
 from .utils import API, exclude_none
 
@@ -219,7 +215,6 @@ class Bot(BaseBot):
     async def _request(self, request: Request) -> Any:
         request.headers.update(
             {
-                "Content-Type": "application/json",
                 "Authorization": f"Bot {self.self_id}.{self.bot_config.token}",
             }
         )
@@ -244,7 +239,7 @@ class Bot(BaseBot):
         return bot_info
 
     @API
-    async def set_bot_island_leave(self, island_source_id: str) -> None:
+    async def set_bot_island_leave(self, *, island_source_id: str) -> None:
         request = Request(
             "POST",
             self.adapter.api_base / "bot/island/leave",
@@ -253,18 +248,18 @@ class Bot(BaseBot):
         await self._request(request)
 
     @API
-    async def get_bt_invite_list(
-        self, page_size: int, max_id: int = 0
-    ) -> GetBotInviteListReturn:
+    async def get_bot_invite_list(
+        self, *, page_size: int, max_id: int = 0
+    ) -> ListResult[BotInviteInfo]:
         request = Request(
             "POST",
             self.adapter.api_base / "bot/invite/list",
             json={"pageSize": page_size, "maxId": max_id},
         )
-        return parse_obj_as(GetBotInviteListReturn, await self._request(request))
+        return parse_obj_as(ListResult[BotInviteInfo], await self._request(request))
 
     @API
-    async def set_bot_invite_add(self, dodo_source_id: str) -> None:
+    async def set_bot_invite_add(self, *, dodo_source_id: str) -> None:
         request = Request(
             "POST",
             self.adapter.api_base / "bot/invite/add",
@@ -273,7 +268,7 @@ class Bot(BaseBot):
         await self._request(request)
 
     @API
-    async def set_bot_invite_remove(self, dodo_source_id: str) -> None:
+    async def set_bot_invite_remove(self, *, dodo_source_id: str) -> None:
         request = Request(
             "POST",
             self.adapter.api_base / "bot/invite/remove",
@@ -282,34 +277,34 @@ class Bot(BaseBot):
         await self._request(request)
 
     @API
-    async def get_island_list(self) -> GetIslandListReturn:
+    async def get_island_list(self) -> List[IslandInfo]:
         request = Request("POST", self.adapter.api_base / "island/list")
-        return parse_obj_as(GetIslandListReturn, await self._request(request))
+        return parse_obj_as(List[IslandInfo], await self._request(request))
 
     @API
-    async def get_island_info(self, island_source_id: str) -> GetIslandInfoReturn:
+    async def get_island_info(self, *, island_source_id: str) -> IslandInfo:
         request = Request(
             "POST",
             self.adapter.api_base / "island/info",
             json={"islandSourceId": island_source_id},
         )
-        return parse_obj_as(GetIslandInfoReturn, await self._request(request))
+        return parse_obj_as(IslandInfo, await self._request(request))
 
     @API
     async def get_island_level_rank_list(
-        self, island_source_id: str
-    ) -> GetIslandLevelRankListReturn:
+        self, *, island_source_id: str
+    ) -> List[IslandLevelRankInfo]:
         request = Request(
             "POST",
             self.adapter.api_base / "island/level/rank/list",
             json={"islandSourceId": island_source_id},
         )
-        return parse_obj_as(GetIslandLevelRankListReturn, await self._request(request))
+        return parse_obj_as(List[IslandLevelRankInfo], await self._request(request))
 
     @API
     async def get_island_mute_list(
-        self, island_source_id: str, page_size: int, max_id: int = 0
-    ) -> GetIslandMuteOrBanListReturn:
+        self, *, island_source_id: str, page_size: int, max_id: int = 0
+    ) -> ListResult[IslandMuteOrBanData]:
         request = Request(
             "POST",
             self.adapter.api_base / "island/mute/list",
@@ -319,12 +314,14 @@ class Bot(BaseBot):
                 "maxId": max_id,
             },
         )
-        return parse_obj_as(GetIslandMuteOrBanListReturn, await self._request(request))
+        return parse_obj_as(
+            ListResult[IslandMuteOrBanData], await self._request(request)
+        )
 
     @API
     async def get_island_ban_list(
-        self, island_source_id: str, page_size: int, max_id: int = 0
-    ) -> GetIslandMuteOrBanListReturn:
+        self, *, island_source_id: str, page_size: int, max_id: int = 0
+    ) -> ListResult[IslandMuteOrBanData]:
         request = Request(
             "POST",
             self.adapter.api_base / "island/ban/list",
@@ -334,33 +331,36 @@ class Bot(BaseBot):
                 "maxId": max_id,
             },
         )
-        return parse_obj_as(GetIslandMuteOrBanListReturn, await self._request(request))
+        return parse_obj_as(
+            ListResult[IslandMuteOrBanData], await self._request(request)
+        )
 
     @API
-    async def get_channel_list(self, island_source_id: str) -> GetChannelListReturn:
+    async def get_channel_list(self, *, island_source_id: str) -> List[ChannelInfo]:
         request = Request(
             "POST",
             self.adapter.api_base / "channel/list",
             json={"islandSourceId": island_source_id},
         )
-        return parse_obj_as(GetChannelListReturn, await self._request(request))
+        return parse_obj_as(List[ChannelInfo], await self._request(request))
 
     @API
-    async def get_channel_info(self, channel_id: str) -> GetChannelInfoReturn:
+    async def get_channel_info(self, *, channel_id: str) -> ChannelInfo:
         request = Request(
             "POST",
             self.adapter.api_base / "channel/info",
             json={"channelId": channel_id},
         )
-        return parse_obj_as(GetChannelInfoReturn, await self._request(request))
+        return parse_obj_as(ChannelInfo, await self._request(request))
 
     @API
     async def set_channel_add(
         self,
+        *,
         island_source_id: str,
         channel_type: ChannelType,
         channel_name: Optional[str] = None,
-    ) -> SetChannelAddReturn:
+    ) -> ChannelData:
         request = Request(
             "POST",
             self.adapter.api_base / "channel/add",
@@ -372,11 +372,12 @@ class Bot(BaseBot):
                 }
             ),
         )
-        return parse_obj_as(SetChannelAddReturn, await self._request(request))
+        return parse_obj_as(ChannelData, await self._request(request))
 
     @API
     async def set_channel_edit(
         self,
+        *,
         island_source_id: str,
         channel_id: str,
         channel_name: Optional[str] = None,
@@ -397,6 +398,7 @@ class Bot(BaseBot):
     @API
     async def set_channel_remove(
         self,
+        *,
         island_source_id: str,
         channel_id: str,
     ) -> None:
@@ -410,12 +412,13 @@ class Bot(BaseBot):
     @API
     async def set_channel_message_send(
         self,
+        *,
         channel_id: str,
         message_type: MessageType,
         message_body: MessageBody,
         referenced_message_id: Optional[str] = None,
         dodo_source_id: Optional[str] = None,
-    ) -> SetChannelMessageSendReturn:
+    ) -> MessageReturn:
         request = Request(
             "POST",
             self.adapter.api_base / "channel/message/send",
@@ -429,11 +432,11 @@ class Bot(BaseBot):
                 }
             ),
         )
-        return parse_obj_as(SetChannelMessageSendReturn, await self._request(request))
+        return parse_obj_as(MessageReturn, await self._request(request))
 
     @API
     async def set_channel_message_edit(
-        self, message_id: str, message_body: MessageBody
+        self, *, message_id: str, message_body: MessageBody
     ) -> None:
         request = Request(
             "POST",
@@ -447,7 +450,7 @@ class Bot(BaseBot):
 
     @API
     async def set_channel_message_withdraw(
-        self, message_id: str, reason: Optional[str] = None
+        self, *, message_id: str, reason: Optional[str] = None
     ) -> None:
         request = Request(
             "POST",
@@ -458,7 +461,7 @@ class Bot(BaseBot):
 
     @API
     async def set_channel_message_top(
-        self, message_id: str, is_cancel: bool = False
+        self, *, message_id: str, is_cancel: bool = False
     ) -> None:
         request = Request(
             "POST",
@@ -469,21 +472,19 @@ class Bot(BaseBot):
 
     @API
     async def get_channel_message_reaction_list(
-        self, message_id: str
-    ) -> GetChannelMessageReactionListReturn:
+        self, *, message_id: str
+    ) -> List[MessageReactionInfo]:
         request = Request(
             "POST",
             self.adapter.api_base / "channel/message/reaction/list",
             json={"messageId": message_id},
         )
-        return parse_obj_as(
-            GetChannelMessageReactionListReturn, await self._request(request)
-        )
+        return parse_obj_as(List[MessageReactionInfo], await self._request(request))
 
     @API
     async def get_channel_message_reaction_member_list(
-        self, message_id: str, emoji: Emoji, page_size: int, max_id: int = 0
-    ) -> GetChannelMessageReactionMemberListReturn:
+        self, *, message_id: str, emoji: Emoji, page_size: int, max_id: int = 0
+    ) -> ListResult[MessageReactionMemberInfo]:
         request = Request(
             "POST",
             self.adapter.api_base / "channel/message/reaction/member/list",
@@ -495,12 +496,12 @@ class Bot(BaseBot):
             },
         )
         return parse_obj_as(
-            GetChannelMessageReactionMemberListReturn, await self._request(request)
+            ListResult[MessageReactionMemberInfo], await self._request(request)
         )
 
     @API
     async def set_channel_message_reaction_add(
-        self, message_id: str, emoji: Emoji
+        self, *, message_id: str, emoji: Emoji
     ) -> None:
         request = Request(
             "POST",
@@ -511,7 +512,7 @@ class Bot(BaseBot):
 
     @API
     async def set_channel_message_reaction_remove(
-        self, message_id: str, emoji: Emoji, dodo_source_id: Optional[str] = None
+        self, *, message_id: str, emoji: Emoji, dodo_source_id: Optional[str] = None
     ) -> None:
         request = Request(
             "POST",
@@ -528,8 +529,8 @@ class Bot(BaseBot):
 
     @API
     async def get_channel_voice_member_status(
-        self, island_source_id: str, dodo_source_id: str
-    ) -> GetChannelVoiceMemberStatusReturn:
+        self, *, island_source_id: str, dodo_source_id: str
+    ) -> ChannelVoiceMemberStatusInfo:
         request = Request(
             "POST",
             self.adapter.api_base / "channel/voice/member/status",
@@ -538,13 +539,11 @@ class Bot(BaseBot):
                 "dodoSourceId": dodo_source_id,
             },
         )
-        return parse_obj_as(
-            GetChannelVoiceMemberStatusReturn, await self._request(request)
-        )
+        return parse_obj_as(ChannelVoiceMemberStatusInfo, await self._request(request))
 
     @API
     async def set_channel_voice_member_move(
-        self, island_source_id: str, dodo_source_id: str, channel_id: str
+        self, *, island_source_id: str, dodo_source_id: str, channel_id: str
     ) -> None:
         request = Request(
             "POST",
@@ -560,6 +559,7 @@ class Bot(BaseBot):
     @API
     async def set_channel_voice_member_edit(
         self,
+        *,
         island_source_id: str,
         dodo_source_id: str,
         operate_type: ManageOperateType,
@@ -578,11 +578,12 @@ class Bot(BaseBot):
     @API
     async def set_channel_article_add(
         self,
+        *,
         channel_id: str,
         titile: str,
         content: Optional[str] = None,
         image_url: Optional[str] = None,
-    ) -> SetChannelArticleAddReturn:
+    ) -> ChannelArticleData:
         request = Request(
             "POST",
             self.adapter.api_base / "channel/article/add",
@@ -595,11 +596,11 @@ class Bot(BaseBot):
                 }
             ),
         )
-        return parse_obj_as(SetChannelArticleAddReturn, await self._request(request))
+        return parse_obj_as(ChannelArticleData, await self._request(request))
 
     @API
     async def set_channel_article_remove(
-        self, channel_id: str, type: BussinessType, id: str
+        self, *, channel_id: str, type: BussinessType, id: str
     ) -> None:
         request = Request(
             "POST",
@@ -609,23 +610,24 @@ class Bot(BaseBot):
         await self._request(request)
 
     @API
-    async def get_role_list(self, island_source_id: str) -> GetRoleListReturn:
+    async def get_role_list(self, *, island_source_id: str) -> List[RoleInfo]:
         request = Request(
             "POST",
             self.adapter.api_base / "role/list",
             json={"islandSourceId": island_source_id},
         )
-        return parse_obj_as(GetRoleListReturn, await self._request(request))
+        return parse_obj_as(List[RoleInfo], await self._request(request))
 
     @API
     async def set_role_add(
         self,
+        *,
         island_source_id: str,
         role_name: Optional[str] = None,
         role_color: Optional[str] = None,
         position: Optional[int] = None,
         permission: Optional[str] = None,
-    ) -> SetRoleAddReturn:
+    ) -> RoleData:
         request = Request(
             "POST",
             self.adapter.api_base / "role/add",
@@ -639,11 +641,12 @@ class Bot(BaseBot):
                 }
             ),
         )
-        return parse_obj_as(SetRoleAddReturn, await self._request(request))
+        return parse_obj_as(RoleData, await self._request(request))
 
     @API
     async def set_role_edit(
         self,
+        *,
         island_source_id: str,
         role_id: str,
         role_name: Optional[str] = None,
@@ -670,6 +673,7 @@ class Bot(BaseBot):
     @API
     async def set_role_remove(
         self,
+        *,
         island_source_id: str,
         role_id: str,
     ) -> None:
@@ -685,8 +689,8 @@ class Bot(BaseBot):
 
     @API
     async def get_role_member_list(
-        self, island_source_id: str, role_id: str, page_size: int, max_id: int = 0
-    ) -> GetRoleMemberListReturn:
+        self, *, island_source_id: str, role_id: str, page_size: int, max_id: int = 0
+    ) -> ListResult[RoleMemberInfo]:
         request = Request(
             "POST",
             self.adapter.api_base / "role/member/list",
@@ -697,11 +701,12 @@ class Bot(BaseBot):
                 "maxId": max_id,
             },
         )
-        return parse_obj_as(GetRoleMemberListReturn, await self._request(request))
+        return parse_obj_as(ListResult[RoleMemberInfo], await self._request(request))
 
     @API
     async def set_role_member_add(
         self,
+        *,
         island_source_id: str,
         dodo_source_id: str,
         role_id: str,
@@ -720,6 +725,7 @@ class Bot(BaseBot):
     @API
     async def set_role_member_remove(
         self,
+        *,
         island_source_id: str,
         dodo_source_id: str,
         role_id: str,
@@ -737,8 +743,8 @@ class Bot(BaseBot):
 
     @API
     async def get_member_list(
-        self, island_source_id: str, page_size: int, max_id: int = 0
-    ) -> GetMemberListReturn:
+        self, *, island_source_id: str, page_size: int, max_id: int = 0
+    ) -> ListResult[MemberInfo]:
         request = Request(
             "POST",
             self.adapter.api_base / "member/list",
@@ -748,14 +754,15 @@ class Bot(BaseBot):
                 "maxId": max_id,
             },
         )
-        return parse_obj_as(GetMemberListReturn, await self._request(request))
+        return parse_obj_as(ListResult[MemberInfo], await self._request(request))
 
     @API
     async def get_member_info(
         self,
+        *,
         island_source_id: str,
         dodo_source_id: str,
-    ) -> GetMemberInfoReturn:
+    ) -> MemberInfo:
         request = Request(
             "POST",
             self.adapter.api_base / "member/info",
@@ -764,14 +771,15 @@ class Bot(BaseBot):
                 "dodoSourceId": dodo_source_id,
             },
         )
-        return parse_obj_as(GetMemberInfoReturn, await self._request(request))
+        return parse_obj_as(MemberInfo, await self._request(request))
 
     @API
     async def get_member_role_list(
         self,
+        *,
         island_source_id: str,
         dodo_source_id: str,
-    ) -> GetMemberRoleListReturn:
+    ) -> List[MemberRoleInfo]:
         request = Request(
             "POST",
             self.adapter.api_base / "member/role/list",
@@ -780,11 +788,12 @@ class Bot(BaseBot):
                 "dodoSourceId": dodo_source_id,
             },
         )
-        return parse_obj_as(GetMemberRoleListReturn, await self._request(request))
+        return parse_obj_as(List[MemberRoleInfo], await self._request(request))
 
     @API
     async def get_member_invitation_info(
         self,
+        *,
         island_source_id: str,
         dodo_source_id: str,
     ) -> GetMemberInvitationInfoReturn:
@@ -800,18 +809,18 @@ class Bot(BaseBot):
 
     @API
     async def get_member_dodo_id_map_list(
-        self, dodo_id_list: List[str]
-    ) -> GetMemberDodoIdMapListReturn:
+        self, *, dodo_id_list: List[str]
+    ) -> List[DoDoIDMapData]:
         request = Request(
             "POST",
             self.adapter.api_base / "member/dodoid/map/list",
             json={"dodoIdList": dodo_id_list},
         )
-        return parse_obj_as(GetMemberDodoIdMapListReturn, await self._request(request))
+        return parse_obj_as(List[DoDoIDMapData], await self._request(request))
 
     @API
     async def set_member_nick_name_edit(
-        self, island_source_id: str, dodo_source_id: str, nick_name: str
+        self, *, island_source_id: str, dodo_source_id: str, nick_name: str
     ) -> None:
         request = Request(
             "POST",
@@ -827,6 +836,7 @@ class Bot(BaseBot):
     @API
     async def set_member_mute_add(
         self,
+        *,
         island_source_id: str,
         dodo_source_id: str,
         duration: int,
@@ -849,6 +859,7 @@ class Bot(BaseBot):
     @API
     async def set_member_mute_remove(
         self,
+        *,
         island_source_id: str,
         dodo_source_id: str,
     ) -> None:
@@ -862,6 +873,7 @@ class Bot(BaseBot):
     @API
     async def set_member_ban_add(
         self,
+        *,
         island_source_id: str,
         dodo_source_id: str,
         notice_channel_id: Optional[str] = None,
@@ -884,6 +896,7 @@ class Bot(BaseBot):
     @API
     async def set_member_ban_remove(
         self,
+        *,
         island_source_id: str,
         dodo_source_id: str,
     ) -> None:
@@ -897,47 +910,50 @@ class Bot(BaseBot):
     @API
     async def get_gift_account(
         self,
+        *,
         island_source_id: str,
-    ) -> GetGiftAccountReturn:
+    ) -> GiftAccountInfo:
         request = Request(
             "POST",
             self.adapter.api_base / "gift/account/info",
             json={"islandSourceId": island_source_id},
         )
-        return parse_obj_as(GetGiftAccountReturn, await self._request(request))
+        return parse_obj_as(GiftAccountInfo, await self._request(request))
 
     @API
     async def get_gift_share_ratio_info(
         self,
+        *,
         island_source_id: str,
-    ) -> GetGiftShareRatioInfoReturn:
+    ) -> GiftShareRatioInfo:
         request = Request(
             "POST",
             self.adapter.api_base / "gift/share/ratio/info",
             json={"islandSourceId": island_source_id},
         )
-        return parse_obj_as(GetGiftShareRatioInfoReturn, await self._request(request))
+        return parse_obj_as(GiftShareRatioInfo, await self._request(request))
 
     @API
     async def get_gift_list(
-        self, target_type: TargetType, target_id: str
-    ) -> GetGiftListReturn:
+        self, *, target_type: TargetType, target_id: str
+    ) -> List[GiftInfo]:
         request = Request(
             "POST",
             self.adapter.api_base / "gift/list",
             json={"targetType": target_type, "targetId": target_id},
         )
-        return parse_obj_as(GetGiftListReturn, await self._request(request))
+        return parse_obj_as(List[GiftInfo], await self._request(request))
 
     @API
     async def get_gift_member_list(
         self,
+        *,
         target_type: TargetType,
         target_id: str,
         gift_id: str,
         page_size: int,
         max_id: int = 0,
-    ) -> GetGiftMemberListReturn:
+    ) -> ListResult[GiftMemberInfo]:
         request = Request(
             "POST",
             self.adapter.api_base / "gift/member/list",
@@ -949,16 +965,17 @@ class Bot(BaseBot):
                 "maxId": max_id,
             },
         )
-        return parse_obj_as(GetGiftMemberListReturn, await self._request(request))
+        return parse_obj_as(ListResult[GiftMemberInfo], await self._request(request))
 
     @API
     async def get_gift_gross_value_list(
         self,
+        *,
         target_type: TargetType,
         target_id: str,
         page_size: int,
         max_id: int = 0,
-    ) -> GetGiftGrossValueListReturn:
+    ) -> ListResult[GiftGrossValueInfo]:
         request = Request(
             "POST",
             self.adapter.api_base / "gift/gross/value/list",
@@ -969,14 +986,17 @@ class Bot(BaseBot):
                 "maxId": max_id,
             },
         )
-        return parse_obj_as(GetGiftGrossValueListReturn, await self._request(request))
+        return parse_obj_as(
+            ListResult[GiftGrossValueInfo], await self._request(request)
+        )
 
     @API
     async def get_integral_info(
         self,
+        *,
         island_source_id: str,
         dodo_source_id: str,
-    ) -> GetIntegralInfoReturn:
+    ) -> IntegralInfo:
         request = Request(
             "POST",
             self.adapter.api_base / "integral/info",
@@ -985,16 +1005,17 @@ class Bot(BaseBot):
                 "dodoSourceId": dodo_source_id,
             },
         )
-        return parse_obj_as(GetIntegralInfoReturn, await self._request(request))
+        return parse_obj_as(IntegralInfo, await self._request(request))
 
     @API
     async def set_integral_edit(
         self,
+        *,
         island_source_id: str,
         dodo_source_id: str,
         integral: int,
         is_add: bool = True,
-    ) -> SetIntegralEditReturn:
+    ) -> IntegralInfo:
         request = Request(
             "POST",
             self.adapter.api_base / "integral/edit",
@@ -1005,16 +1026,17 @@ class Bot(BaseBot):
                 "operateType": 1 if is_add else 2,
             },
         )
-        return parse_obj_as(SetIntegralEditReturn, await self._request(request))
+        return parse_obj_as(IntegralInfo, await self._request(request))
 
     @API
     async def set_personal_message_send(
         self,
+        *,
         island_source_id: str,
         dodo_source_id: str,
         message_type: MessageType,
         message_body: MessageBody,
-    ) -> SetPersonalMessageSendReturn:
+    ) -> MessageReturn:
         request = Request(
             "POST",
             self.adapter.api_base / "personal/message/send",
@@ -1025,12 +1047,12 @@ class Bot(BaseBot):
                 "messageBody": message_body.dict(by_alias=True, exclude_none=True),
             },
         )
-        return parse_obj_as(SetPersonalMessageSendReturn, await self._request(request))
+        return parse_obj_as(MessageReturn, await self._request(request))
 
     @API
     async def set_resouce_picture_upload(
-        self, file: Union[bytes, BytesIO, Path]
-    ) -> SetResourcePictureUploadReturn:
+        self, *, file: Union[bytes, BytesIO, Path], file_name: Optional[str] = None
+    ) -> PictureInfo:
         if isinstance(file, Path):
             file = file.read_bytes()
         elif isinstance(file, BytesIO):
@@ -1038,13 +1060,11 @@ class Bot(BaseBot):
         request = Request(
             "POST",
             self.adapter.api_base / "resource/picture/upload",
-            files={"file": file},
+            files={"file": (file_name or "image.png", file, "multipart/form-data")},
         )
-        return parse_obj_as(
-            SetResourcePictureUploadReturn, await self._request(request)
-        )
+        return parse_obj_as(PictureInfo, await self._request(request))
 
     @API
-    async def get_websocket_connection(self) -> GetWebSocketConnectionReturn:
+    async def get_websocket_connection(self) -> WebSocketConnectionData:
         request = Request("POST", self.adapter.api_base / "websocket/connection")
-        return parse_obj_as(GetWebSocketConnectionReturn, await self._request(request))
+        return parse_obj_as(WebSocketConnectionData, await self._request(request))

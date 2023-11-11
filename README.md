@@ -18,9 +18,11 @@ _✨ DoDo 协议适配 ✨_
 
 ```dotenv
 DRIVER=~aiohttp
+# 或
+DRIVER=~httpx+~websockets
 ```
 
-> websockets 驱动器存在一些问题，建议使用 aiohttp 驱动器。
+> websockets 驱动器可能存在心跳断连问题，可尝试使用 aiohttp 驱动器。
 
 
 ### DODO_BOTS
@@ -54,7 +56,9 @@ DODO_BOTS='
 - `MessageSegment.video` 视频
 - `MessageSegment.card` 卡片消息
 
-> 发送图片和视频所需要的链接通过 `Bot.set_resouce_picture_upload` 接口来上传，返回结果中的的 `url` 即为所需的链接。
+> 发送图片和视频所需要的 url 都必须为官方 url
+> 图片可通过 `Bot.set_resouce_picture_upload` 接口来上传图片bytes，返回结果中的 `url` 即为发送所需的 url。
+> 视频尚未提供上传接口，因此只能上传来自平台事件中带有的官方视频 url。
 
 > 图片和视频只能单独发送，不能和其他消息段一起发送。卡片消息可以和文本消息段一起发送。
 
@@ -84,3 +88,5 @@ DODO_BOTS='
 - `IntegralChangeEvent` 积分变更事件
 - `GoodsPurchaseEvent` 商品购买成功事件
 - `PersonalMessageEvent` 私信事件
+
+支持的 API 列表请参考 [DoDo开放平台](https://doker.imdodo.com/)。
