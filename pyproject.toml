@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-adapter-dodo"
-version = "0.1.0"
+version = "0.1.1"
 description = "Dodo adapter for nonebot2"
 authors = ["CMHopeSunshine <277073121@qq.com>"]
 license = "MIT"
