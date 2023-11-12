@@ -469,7 +469,10 @@ class Message(BaseMessage[MessageSegment]):
             message_id = ref[-1].data["message_id"]
         else:
             message_id = None
-        last_seg = self[-1]
+        msg = self.exclude("reference")
+        if not msg:
+            return TextMessage(content=""), None
+        last_seg = msg[-1]
         if isinstance(
             last_seg,
             (
@@ -482,11 +485,11 @@ class Message(BaseMessage[MessageSegment]):
             ),
         ):
             return last_seg.message_body, message_id
-        if card := (self["card"] or None):
+        if card := (msg["card"] or None):
             return CardMessage(
-                content=self.extract_text_content() or None, card=card[-1].data["card"]
+                content=msg.extract_text_content() or None, card=card[-1].data["card"]
             ), message_id
-        return TextMessage(content=self.extract_text_content()), message_id
+        return TextMessage(content=msg.extract_text_content()), message_id
 
     def extract_text_content(self) -> str:
         return "".join(
