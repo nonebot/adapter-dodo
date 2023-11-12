@@ -22,8 +22,6 @@ DRIVER=~aiohttp
 DRIVER=~httpx+~websockets
 ```
 
-> websockets 驱动器可能存在心跳断连问题，可尝试使用 aiohttp 驱动器。
-
 
 ### DODO_BOTS
 

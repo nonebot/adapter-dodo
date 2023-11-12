@@ -96,6 +96,13 @@ class Adapter(BaseAdapter):
                         ),
                     )
                     try:
+                        from nonebot.drivers.websockets import WebSocket
+
+                        if isinstance(ws, WebSocket):
+                            ws.websocket.ping_interval = None
+                    except Exception:
+                        pass
+                    try:
                         self.bot_connect(bot)
                         heartbeat_task = asyncio.create_task(self._heartbeat(ws))
 
