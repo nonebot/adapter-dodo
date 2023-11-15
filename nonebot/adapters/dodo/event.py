@@ -129,8 +129,8 @@ class MessageEvent(Event):
         return self.get_message()
 
     @property
-    def origin_message(self) -> Message:
-        return getattr(self, "_origin_message", self.get_message())
+    def original_message(self) -> Message:
+        return getattr(self, "_original_message", self.get_message())
 
     @property
     def reply(self) -> Optional[Reference]:
@@ -152,7 +152,7 @@ class MessageEvent(Event):
             )
             setattr(
                 self,
-                "_origin_message",
+                "_original_message",
                 Message.from_message_body(
                     self.message_body, getattr(self, "reference", None)
                 ),
