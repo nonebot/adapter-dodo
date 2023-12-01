@@ -195,7 +195,7 @@ class CardMessageButtonClickEvent(NoticeEvent):
     message_id: str
     personal: Personal
     member: Member
-    interact_custom_id: str
+    interact_custom_id: Optional[str] = None
     value: str
 
 
@@ -207,7 +207,7 @@ class CardMessageFormSubmitEvent(NoticeEvent):
     message_id: str
     personal: Personal
     member: Member
-    interact_custom_id: str
+    interact_custom_id: Optional[str] = None
     form_data: List[FormData]
 
 
@@ -219,7 +219,7 @@ class CardMessageListSubmitEvent(NoticeEvent):
     message_id: str
     personal: Personal
     member: Member
-    interact_custom_id: str
+    interact_custom_id: Optional[str] = None
     list_data: List[ListData]
 
 
