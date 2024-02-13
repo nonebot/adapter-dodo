@@ -65,7 +65,7 @@ class ListResult(GenericModel, Generic[T]):
 class ApiReturn(BaseModel):
     status: int
     message: str
-    data: Any
+    data: Any = None
 
 
 ## 机器人API ##
