@@ -12,6 +12,8 @@ from typing import (
     Union,
 )
 
+from nonebot.compat import PYDANTIC_V2, ConfigDict
+
 from pydantic import (
     BaseModel as PydanticBaseModel,
     Field,
@@ -24,10 +26,18 @@ T = TypeVar("T")
 
 
 class BaseModel(PydanticBaseModel):
-    class Config:
-        extra = "allow"
-        allow_population_by_field_name = True
-        alias_generator = to_lower_camel
+    if PYDANTIC_V2:
+        model_config = ConfigDict(
+            extra="allow",
+            populate_by_name=True,
+            alias_generator=to_lower_camel,
+        )
+    else:
+
+        class Config(ConfigDict):
+            extra = "allow"
+            allow_population_by_field_name = True
+            alias_generator = to_lower_camel
 
 
 # API #
@@ -35,10 +45,18 @@ class ListResult(GenericModel, Generic[T]):
     max_id: int
     list: List[T]
 
-    class Config:
-        extra = "allow"
-        allow_population_by_field_name = True
-        alias_generator = to_lower_camel
+    if PYDANTIC_V2:
+        model_config = ConfigDict(
+            extra="allow",
+            populate_by_name=True,
+            alias_generator=to_lower_camel,
+        )
+    else:
+
+        class Config(ConfigDict):
+            extra = "allow"
+            allow_population_by_field_name = True
+            alias_generator = to_lower_camel
 
     def __iter__(self) -> Iterator[T]:
         return iter(self.list)

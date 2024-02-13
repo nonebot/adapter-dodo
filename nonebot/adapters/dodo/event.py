@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Literal, Optional, Union
 from typing_extensions import override
 
 from nonebot.adapters import Event as BaseEvent
+from nonebot.compat import PYDANTIC_V2, ConfigDict
 from nonebot.utils import escape_tag
 
 from pydantic import BaseModel, Field, validator
@@ -71,10 +72,18 @@ class Event(BaseEvent):
 
     dodo_source_id: str
 
-    class Config:
-        extra = "allow"
-        allow_population_by_field_name = True
-        alias_generator = to_lower_camel
+    if PYDANTIC_V2:
+        model_config = ConfigDict(
+            extra="allow",
+            populate_by_name=True,
+            alias_generator=to_lower_camel,
+        )
+    else:
+
+        class Config(ConfigDict):
+            extra = "allow"
+            allow_population_by_field_name = True
+            alias_generator = to_lower_camel
 
     @property
     def user_id(self) -> str:
