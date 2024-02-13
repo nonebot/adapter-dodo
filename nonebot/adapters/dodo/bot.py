@@ -1,4 +1,5 @@
 from io import BytesIO
+import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, NoReturn, Optional, Union
 from typing_extensions import override
@@ -201,7 +202,9 @@ class Bot(BaseBot):
         raise RuntimeError("Event cannot be replied to!")
 
     def _handle_response(self, response: Response) -> Any:
-        if response.content and (result := ApiReturn.parse_raw(response.content)):
+        if response.content and (
+            result := type_validate_python(ApiReturn, json.loads(response.content))
+        ):
             if result.status == 0:
                 return result.data
             if result.status == 10005:
