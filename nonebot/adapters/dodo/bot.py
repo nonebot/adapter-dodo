@@ -9,6 +9,7 @@ from nonebot.compat import type_validate_python
 from nonebot.drivers import Request, Response
 from nonebot.message import handle_event
 
+from .compat import model_dump
 from .config import BotConfig
 from .event import ChannelMessageEvent, Event, PersonalMessageEvent
 from .exception import (
@@ -432,7 +433,9 @@ class Bot(BaseBot):
                 {
                     "channelId": channel_id,
                     "messageType": message_type,
-                    "messageBody": message_body.dict(by_alias=True, exclude_none=True),
+                    "messageBody": model_dump(
+                        message_body, by_alias=True, exclude_none=True
+                    ),
                     "referencedMessageId": referenced_message_id,
                     "dodoSourceId": dodo_source_id,
                 }
@@ -449,7 +452,9 @@ class Bot(BaseBot):
             self.adapter.api_base / "channel/message/edit",
             json={
                 "messageId": message_id,
-                "messageBody": message_body.dict(by_alias=True, exclude_none=True),
+                "messageBody": model_dump(
+                    message_body, by_alias=True, exclude_none=True
+                ),
             },
         )
         await self._request(request)
@@ -498,7 +503,7 @@ class Bot(BaseBot):
             self.adapter.api_base / "channel/message/reaction/member/list",
             json={
                 "messageId": message_id,
-                "emoji": emoji.dict(),
+                "emoji": model_dump(emoji),
                 "pageSize": page_size,
                 "maxId": max_id,
             },
@@ -514,7 +519,7 @@ class Bot(BaseBot):
         request = Request(
             "POST",
             self.adapter.api_base / "channel/message/reaction/add",
-            json={"messageId": message_id, "emoji": emoji.dict()},
+            json={"messageId": message_id, "emoji": model_dump(emoji)},
         )
         await self._request(request)
 
@@ -528,7 +533,7 @@ class Bot(BaseBot):
             json=exclude_none(
                 {
                     "messageId": message_id,
-                    "emoji": emoji.dict(),
+                    "emoji": model_dump(emoji),
                     "dodoSourceId": dodo_source_id,
                 }
             ),
@@ -1062,7 +1067,9 @@ class Bot(BaseBot):
                 "islandSourceId": island_source_id,
                 "dodoSourceId": dodo_source_id,
                 "messageType": message_type,
-                "messageBody": message_body.dict(by_alias=True, exclude_none=True),
+                "messageBody": model_dump(
+                    message_body, by_alias=True, exclude_none=True
+                ),
             },
         )
         return type_validate_python(MessageReturn, await self._request(request))

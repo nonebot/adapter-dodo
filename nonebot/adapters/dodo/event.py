@@ -7,8 +7,9 @@ from nonebot.adapters import Event as BaseEvent
 from nonebot.compat import PYDANTIC_V2, ConfigDict
 from nonebot.utils import escape_tag
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
+from .compat import field_validator, model_dump
 from .message import Message
 from .models import (
     Emoji,
@@ -99,7 +100,7 @@ class Event(BaseEvent):
 
     @override
     def get_event_description(self) -> str:
-        return escape_tag(str(self.dict()))
+        return escape_tag(str(model_dump(self)))
 
     @override
     def get_message(self) -> Message:
@@ -373,7 +374,7 @@ class EventSubject(BaseModel):
     data: EventClass = Field(discriminator="event_type")
     version: str
 
-    @validator("data", pre=True)
+    @field_validator("data", mode="before")
     def pre_handle_data(cls, v: Dict[str, Any]) -> Dict[str, Any]:
         v.update(v.pop("eventBody"))
         return v
