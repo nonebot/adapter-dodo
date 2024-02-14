@@ -18,8 +18,8 @@ from pydantic import (
     BaseModel as PydanticBaseModel,
     Field,
 )
-from pydantic.generics import GenericModel
 
+from .compat import GenericModel
 from .utils import to_lower_camel
 
 T = TypeVar("T")

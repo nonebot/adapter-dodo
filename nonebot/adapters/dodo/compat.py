@@ -4,10 +4,11 @@ from nonebot.compat import PYDANTIC_V2
 
 from pydantic import BaseModel
 
-__all__ = ("model_validator", "field_validator")
+__all__ = ("model_validator", "field_validator", "GenericModel")
 
 if PYDANTIC_V2:
     from pydantic import (
+        BaseModel as GenericModel,
         field_validator as field_validator,
         model_validator as model_validator,
     )
@@ -27,6 +28,7 @@ if PYDANTIC_V2:
         )
 else:
     from pydantic import root_validator, validator
+    from pydantic.generics import GenericModel as GenericModel
 
     @overload
     def model_validator(*, mode: Literal["before"]):
