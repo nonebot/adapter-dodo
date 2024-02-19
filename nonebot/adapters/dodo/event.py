@@ -4,10 +4,12 @@ from typing import Any, Dict, List, Literal, Optional, Union
 from typing_extensions import override
 
 from nonebot.adapters import Event as BaseEvent
+from nonebot.compat import PYDANTIC_V2, ConfigDict
 from nonebot.utils import escape_tag
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
+from .compat import field_validator, model_dump
 from .message import Message
 from .models import (
     Emoji,
@@ -71,10 +73,18 @@ class Event(BaseEvent):
 
     dodo_source_id: str
 
-    class Config:
-        extra = "allow"
-        allow_population_by_field_name = True
-        alias_generator = to_lower_camel
+    if PYDANTIC_V2:
+        model_config = ConfigDict(
+            extra="allow",
+            populate_by_name=True,
+            alias_generator=to_lower_camel,
+        )
+    else:
+
+        class Config(ConfigDict):
+            extra = "allow"
+            allow_population_by_field_name = True
+            alias_generator = to_lower_camel
 
     @property
     def user_id(self) -> str:
@@ -90,7 +100,7 @@ class Event(BaseEvent):
 
     @override
     def get_event_description(self) -> str:
-        return escape_tag(str(self.dict()))
+        return escape_tag(str(model_dump(self)))
 
     @override
     def get_message(self) -> Message:
@@ -364,7 +374,7 @@ class EventSubject(BaseModel):
     data: EventClass = Field(discriminator="event_type")
     version: str
 
-    @validator("data", pre=True)
+    @field_validator("data", mode="before")
     def pre_handle_data(cls, v: Dict[str, Any]) -> Dict[str, Any]:
         v.update(v.pop("eventBody"))
         return v

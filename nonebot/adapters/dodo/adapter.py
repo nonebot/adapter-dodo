@@ -3,7 +3,9 @@ import json
 from typing import Any, List, Optional
 from typing_extensions import override
 
+from nonebot import get_plugin_config
 from nonebot.adapters import Adapter as BaseAdapter
+from nonebot.compat import type_validate_python
 from nonebot.drivers import (
     URL,
     Driver,
@@ -26,7 +28,7 @@ class Adapter(BaseAdapter):
     @override
     def __init__(self, driver: Driver, **kwargs: Any):
         super().__init__(driver, **kwargs)
-        self.dodo_config = Config.parse_obj(self.config)
+        self.dodo_config = get_plugin_config(Config)
         self.api_base: URL = URL("https://botopen.imdodo.com/api/v2")
         self.tasks: List["asyncio.Task"] = []
         self.setup()
@@ -156,7 +158,7 @@ class Adapter(BaseAdapter):
                 log("TRACE", f"Receive Heartbeat: {payload}")
                 continue
             try:
-                event_subject = EventSubject.parse_obj(payload)
+                event_subject = type_validate_python(EventSubject, payload)
             except Exception as e:
                 log(
                     "WARNING",
