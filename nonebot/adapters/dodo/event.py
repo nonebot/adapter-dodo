@@ -4,12 +4,12 @@ from typing import Any, Dict, List, Literal, Optional, Union
 from typing_extensions import override
 
 from nonebot.adapters import Event as BaseEvent
-from nonebot.compat import PYDANTIC_V2, ConfigDict
+from nonebot.compat import PYDANTIC_V2, ConfigDict, model_dump
 from nonebot.utils import escape_tag
 
 from pydantic import BaseModel, Field
 
-from .compat import field_validator, model_dump
+from .compat import field_validator
 from .message import Message
 from .models import (
     Emoji,

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-adapter-dodo"
-version = "0.2.0"
+version = "0.2.1"
 description = "Dodo adapter for nonebot2"
 authors = ["CMHopeSunshine <277073121@qq.com>"]
 license = "MIT"
@@ -14,10 +14,10 @@ packages = [{ include = "nonebot" }]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-nonebot2 = "^2.2.0"
+nonebot2 = "^2.2.1"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.1.4"
+ruff = "^0.1.15"
 nonemoji = "^0.1.2"
 pre-commit = "^3.1.0"
 
