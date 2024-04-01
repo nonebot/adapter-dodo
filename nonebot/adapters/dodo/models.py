@@ -597,9 +597,9 @@ class CardButton(BaseModel):
     type: Literal["button"] = Field(default="button", init=False)
     interact_custom_id: Optional[str] = None
     click: ButtonClickAction
-    color: Literal[
-        "grey", "red", "orange", "green", "blue", "purple", "default"
-    ] = "default"
+    color: Literal["grey", "red", "orange", "green", "blue", "purple", "default"] = (
+        "default"
+    )
     name: str
     form: Optional["CallbackForm"] = None
 
