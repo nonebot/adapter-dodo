@@ -16,16 +16,13 @@ else:
     from pydantic.generics import GenericModel as GenericModel
 
     @overload
-    def model_validator(*, mode: Literal["before"]):
-        ...
+    def model_validator(*, mode: Literal["before"]): ...
 
     @overload
-    def model_validator(*, mode: Literal["after"]):
-        ...
+    def model_validator(*, mode: Literal["after"]): ...
 
     def model_validator(*, mode: Literal["before", "after"] = "after"):
         return root_validator(pre=mode == "before", allow_reuse=True)
 
     def field_validator(__field, *fields, mode: Literal["before", "after"] = "after"):
         return validator(__field, *fields, pre=mode == "before", allow_reuse=True)
-
