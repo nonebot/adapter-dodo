@@ -5,6 +5,7 @@ from typing_extensions import override
 
 from nonebot import get_plugin_config
 from nonebot.adapters import Adapter as BaseAdapter
+
 from nonebot.compat import type_validate_python
 from nonebot.drivers import (
     URL,
@@ -30,7 +31,7 @@ class Adapter(BaseAdapter):
         super().__init__(driver, **kwargs)
         self.dodo_config = get_plugin_config(Config)
         self.api_base: URL = URL("https://botopen.imdodo.com/api/v2")
-        self.tasks: List["asyncio.Task"] = []
+        self.tasks: List[asyncio.Task] = []
         self.setup()
 
     @classmethod
@@ -86,7 +87,7 @@ class Adapter(BaseAdapter):
 
     async def _forward_ws(self, bot: Bot, ws_url: URL) -> None:
         request = Request("GET", ws_url, timeout=30.0)
-        heartbeat_task: Optional["asyncio.Task"] = None
+        heartbeat_task: Optional[asyncio.Task] = None
         while True:
             try:
                 async with self.websocket(request) as ws:
