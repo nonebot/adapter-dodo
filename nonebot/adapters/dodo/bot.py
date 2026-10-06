@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, List, NoReturn, Optional, Union
 from typing_extensions import override
 
 from nonebot.adapters import Bot as BaseBot
+
 from nonebot.compat import model_dump, type_validate_python
 from nonebot.drivers import Request, Response
 from nonebot.message import handle_event
